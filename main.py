@@ -25,7 +25,7 @@ parser.add_argument(IGNORE_FLAG, type=str, nargs='+', help='Patters to ignore fr
 parser.add_argument('--dry', action='store_true', help='Dry run, do not create the zip file', default=False)
 args = parser.parse_args()
 
-if (args.root_folder is None or args.root_folder is '') and len(args.input) == 0:
+if (args.root_folder is None or args.root_folder == '') and len(args.input) == 0:
     raise argparse.ArgumentError(None, "No input files or root folder specified")
 
 # Define the folder to zip

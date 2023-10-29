@@ -1,5 +1,5 @@
 import zipfile, pathlib, argparse, fnmatch
-from typing import List, Tuple, Iterable
+from typing import List, Tuple, Iterable, Union
 
 ROOT_FLAG = "--root_folder"
 ADDITIONAL_FLAG = "--input"
@@ -13,6 +13,15 @@ Example:
     zip-folder.py {ADDITIONAL_FLAG} "input1" "input2" {OUTPUT_ZIP_FLAG} "out/out.zip" {IGNORE_FLAG} "*input1/folder_ignore/*" "*input2/ignore_file.txt"
 '''
 
+def str2bool(v: Union[str, bool]):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    if v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(
     description='Zip a folder',
     epilog=example_text,
@@ -22,7 +31,7 @@ parser.add_argument(ROOT_FLAG, type=str, help="The root folder to zip", required
 parser.add_argument(ADDITIONAL_FLAG, type=str, nargs='+', help='Additional files to zip', default=[])
 parser.add_argument(OUTPUT_ZIP_FLAG, type=str, help='The zip file to create', required=True)
 parser.add_argument(IGNORE_FLAG, type=str, nargs='+', help='Patters to ignore from the root folder and additional dirs', default=[])
-parser.add_argument('--dry', action='store_true', help='Dry run, do not create the zip file', default=False)
+parser.add_argument('--dry', type=str2bool, help='Dry run, do not create the zip file', default=False)
 args = parser.parse_args()
 
 if (args.root_folder is None or args.root_folder == '') and len(args.input) == 0:

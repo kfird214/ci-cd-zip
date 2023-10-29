@@ -40,11 +40,12 @@ parser.add_argument(IGNORE_FLAG, type=str, nargs='+', help='Patters to ignore fr
 parser.add_argument('--dry', type=str2bool, help='Dry run, do not create the zip file', default=False)
 args = parser.parse_args()
 
-if (args.root_folder is None or args.root_folder == '') and len(args.input) == 0:
+arg_input = [i for i in args.input if i is not None and i != '']
+if (args.root_folder is None or args.root_folder == '') and (len(arg_input) == 0):
     raise argparse.ArgumentError(None, "No input files or root folder specified")
 
 # Define the folder to zip
-input_paths = [pathlib.Path(f) for f in args.input if f is not None and f !='']
+input_paths = [pathlib.Path(f) for f in arg_input]
 resolved_input_paths = [rp.resolve() for rp in input_paths]
 
 print('Inputs to zip')
@@ -74,7 +75,7 @@ print()
 
 # Create a list of files to add to the zip file
 files_to_zip: List[Tuple[pathlib.Path, Iterable[pathlib.Path]]] = []
-if args.root_folder is not None:
+if args.root_folder is not None and args.root_folder != '':
     rootResolvedFolder = pathlib.Path(args.root_folder).resolve()
     print(f'Root folder: "{rootResolvedFolder}"')
     files_to_zip.append((rootResolvedFolder, rootResolvedFolder.rglob('*')))

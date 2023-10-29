@@ -1,6 +1,11 @@
-import zipfile, os, pathlib, argparse
+import zipfile, os, pathlib, argparse, fnmatch
 
-parser = argparse.ArgumentParser(description='Zip a folder')
+example_text = '''
+Example:
+    zip-folder.py "folder" "folder.zip" --ignore "*/folder_ignore/*" "*/ignore_file.txt"
+'''
+
+parser = argparse.ArgumentParser(description='Zip a folder', epilog=example_text)
 parser.add_argument('folder', type=str, help='The folder to zip')
 parser.add_argument('zip', type=str, help='The zip file to create')
 parser.add_argument('--ignore', type=str, nargs='+', help='The paths to ignore')
@@ -33,8 +38,6 @@ print()
 # Create a list of files to add to the zip file
 files_to_zip = rootPath.rglob('*')
 
-# print(f"zipping {len(files_to_zip)} files")
-
 # Create the zip file
 with zipfile.ZipFile(zip_file_path, "w") as zip_file:
     for file in files_to_zip:
@@ -49,7 +52,7 @@ with zipfile.ZipFile(zip_file_path, "w") as zip_file:
             # ignoreP = pathlib.Path(rootResolvedFolder / ignorePaths)
             ignoreP = pathlib.Path(ignorePaths)
             print(f'├─ Testing "{rfile}" against "{ignoreP}"')
-            if str(ignoreP) in str(rfile):
+            if str(ignoreP) in str(rfile) or fnmatch.fnmatch(str(rfile), str(ignoreP)):
                 print(f'├── ✖️ Skipping file because ignore path "{ignoreP}" is in "{rfile}"')
                 shouldIgnore = True
                 break
@@ -60,6 +63,3 @@ with zipfile.ZipFile(zip_file_path, "w") as zip_file:
         print(f'├─ ✅ Adding file: "{file}"')
         entryName = str(rfile).replace(str(rootResolvedFolder), "")
         zip_file.write(file, entryName)
-
-# Move the zip file to the folder to zip
-# shutil.move(zip_file_name, folder_to_zip)

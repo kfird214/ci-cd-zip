@@ -8,10 +8,8 @@ IGNORE_FLAG = '--ignore'
 
 istty = sys.stdout.isatty()
 
-# DOWN_CHAR = '├'
-# INDENT_CHAR = '─'
-DOWN_CHAR = '|'
-INDENT_CHAR = '-'
+DOWN_CHAR = '├' if istty else '|'
+INDENT_CHAR = '─' if istty else '-'
 C = DOWN_CHAR + INDENT_CHAR
 
 example_text = f'''
@@ -98,7 +96,7 @@ def add_file_to_zip(resolved_file_path: pathlib.Path, entry_name: str):
         ignoreP = pathlib.Path(ignorePaths)
         print(f'{C} Testing "{resolved_file_path}" against "{ignoreP}"')
         if str(ignoreP) in str(resolved_file_path) or fnmatch.fnmatch(str(resolved_file_path), str(ignoreP)):
-            print(f'{C}─ Skipping file because ignore path "{ignoreP}" is in "{resolved_file_path}"')
+            print(f'{C}{INDENT_CHAR} Skipping file because ignore path "{ignoreP}" is in "{resolved_file_path}"')
             return None
 
     print(f'{C} Adding file: "{file}" with entry name "{entry_name}"')

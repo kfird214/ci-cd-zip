@@ -36,4 +36,4 @@ runs:
   steps:
     - name: Zip
       shell: cmd
-      run: python ${{ github.action_path }}/main.py --zip ${{ inputs.output_zip }} --root_folder ${{ inputs.root_folder }} --input ${{ inputs.additional }} --ignore ${{ inputs.ignore_patters }} --dry_run ${{ inputs.dry_run }}
+      run: python ${{ github.action_path }}/main.py --zip ${{ inputs.output_zip }} --root_folder ${{ inputs.root_folder }} --input ${{ inputs.additional }} --ignore ${{ inputs.ignore_patters }} --dry ${{ inputs.dry_run }}

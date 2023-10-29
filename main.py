@@ -1,10 +1,18 @@
-import zipfile, pathlib, argparse, fnmatch
+import zipfile, pathlib, argparse, fnmatch, sys
 from typing import List, Tuple, Iterable, Union
 
 ROOT_FLAG = "--root_folder"
 ADDITIONAL_FLAG = "--input"
 OUTPUT_ZIP_FLAG = '--zip'
 IGNORE_FLAG = '--ignore'
+
+istty = sys.stdout.isatty()
+
+# DOWN_CHAR = '├'
+# INDENT_CHAR = '─'
+DOWN_CHAR = '|'
+INDENT_CHAR = '-'
+C = DOWN_CHAR + INDENT_CHAR
 
 example_text = f'''
 Example:
@@ -40,12 +48,6 @@ if (args.root_folder is None or args.root_folder == '') and len(args.input) == 0
 # Define the folder to zip
 input_paths = [pathlib.Path(f) for f in args.input if f is not None and f !='']
 resolved_input_paths = [rp.resolve() for rp in input_paths]
-
-# DOWN_CHAR = '├'
-# INDENT_CHAR = '─'
-DOWN_CHAR = '|'
-INDENT_CHAR = '-'
-C = DOWN_CHAR + INDENT_CHAR
 
 print('Inputs to zip')
 for p in resolved_input_paths:
@@ -88,7 +90,7 @@ for inputPath in input_paths:
 def add_file_to_zip(resolved_file_path: pathlib.Path, entry_name: str):
     print(resolved_file_path)
     if resolved_file_path.is_dir():
-        print(f"{C} ✖️ 📁 Skipping directory: " + str(file))
+        print(f"{C} Skipping directory: " + str(file))
         return None
 
     for ignorePaths in ignore_paths_relative:
@@ -96,14 +98,15 @@ def add_file_to_zip(resolved_file_path: pathlib.Path, entry_name: str):
         ignoreP = pathlib.Path(ignorePaths)
         print(f'{C} Testing "{resolved_file_path}" against "{ignoreP}"')
         if str(ignoreP) in str(resolved_file_path) or fnmatch.fnmatch(str(resolved_file_path), str(ignoreP)):
-            print(f'{C}─ ✖️ Skipping file because ignore path "{ignoreP}" is in "{resolved_file_path}"')
+            print(f'{C}─ Skipping file because ignore path "{ignoreP}" is in "{resolved_file_path}"')
             return None
 
-    print(f'{C} ✅ Adding file: "{file}" with entry name "{entry_name}"')
+    print(f'{C} Adding file: "{file}" with entry name "{entry_name}"')
     
     return file
 
 # Create the zip file
+zip_file = None
 if args.dry != False:
     zip_file = zipfile.ZipFile(zip_file_path, "w")
 
@@ -114,8 +117,8 @@ for folder_glob_pair in files_to_zip:
         entryName = str(rfile).replace(str(root_path), "")
         fpath = add_file_to_zip(rfile, entryName)
 
-        if args.dry != False and fpath is not None:
+        if zip_file is not None and fpath is not None:
             zip_file.write(fpath, entryName)
 
-if args.dry != False:
+if zip_file is not None:
     zip_file.close()

@@ -1,0 +1,37 @@
+name: 'Zip'
+description: 'Zip folder and ignore some files'
+inputs:
+  root_folder:  # id of input
+    description: 'The root folder to zip'
+    required: false
+    default: '""'
+
+  additional:
+    description: 'Additional files to include'
+    required: false
+    default: '""'
+
+  ignore_patters:
+    description: 'Ignore patterns'
+    required: false
+    default: '""'
+
+  output_zip:
+    description: 'Output zip location'
+    required: false
+    default: '""'
+
+  dry_run:
+    description: 'Dry run'
+    required: false
+
+# outputs:
+#   output_zip_location:
+#     description: "Random number"
+#     value: ${{ steps.random-number-generator.outputs.random-number }}
+
+runs:
+  using: "composite"
+  steps:
+    - zip:
+        run: python3 ${{ giyhub.action_path }}/main.py --zip ${{ inputs.output_zip }} --root_folder ${{ inputs.root_folder }} --input ${{ inputs.additional }} --ignore ${{ inputs.ignore_patters }} --dry

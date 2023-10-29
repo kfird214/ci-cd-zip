@@ -33,4 +33,4 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: python3 ${{ giyhub.action_path }}/main.py --zip ${{ inputs.output_zip }} --root_folder ${{ inputs.root_folder }} --input ${{ inputs.additional }} --ignore ${{ inputs.ignore_patters }} --dry
+    - run: python3 ${{ github.action_path }}/main.py --zip ${{ inputs.output_zip }} --root_folder ${{ inputs.root_folder }} --input ${{ inputs.additional }} --ignore ${{ inputs.ignore_patters }} --dry

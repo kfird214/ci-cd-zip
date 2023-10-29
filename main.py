@@ -32,9 +32,15 @@ if (args.root_folder is None or args.root_folder == '') and len(args.input) == 0
 input_paths = [pathlib.Path(f) for f in args.input if f is not None and f !='']
 resolved_input_paths = [rp.resolve() for rp in input_paths]
 
+# DOWN_CHAR = '├'
+# INDENT_CHAR = '─'
+DOWN_CHAR = '|'
+INDENT_CHAR = '-'
+C = DOWN_CHAR + INDENT_CHAR
+
 print('Inputs to zip')
 for p in resolved_input_paths:
-    print(f'├─ "{p}"')
+    print(f'{C} "{p}"')
 print()
 
 # Define the name of the zip file to create
@@ -54,7 +60,7 @@ ignore_paths_relative = args.ignore
 print()
 print('Ignore paths')
 for p in ignore_paths_relative:
-    print(f'├─ "{p}"')
+    print(f'{C} "{p}"')
 print()
 
 # Create a list of files to add to the zip file
@@ -71,21 +77,20 @@ for inputPath in input_paths:
         files_to_zip.append((inputPath.parent, [inputPath]))
 
 def add_file_to_zip(resolved_file_path: pathlib.Path, entry_name: str):
-    rfile = resolved_file_path
-    print(rfile)
-    if rfile.is_dir():
-        print("├─ ✖️ 📁 Skipping directory: " + str(file))
+    print(resolved_file_path)
+    if resolved_file_path.is_dir():
+        print(f"{C} ✖️ 📁 Skipping directory: " + str(file))
         return None
 
     for ignorePaths in ignore_paths_relative:
         # ignoreP = pathlib.Path(rootResolvedFolder / ignorePaths)
         ignoreP = pathlib.Path(ignorePaths)
-        print(f'├─ Testing "{rfile}" against "{ignoreP}"')
-        if str(ignoreP) in str(rfile) or fnmatch.fnmatch(str(rfile), str(ignoreP)):
-            print(f'├── ✖️ Skipping file because ignore path "{ignoreP}" is in "{rfile}"')
+        print(f'{C} Testing "{resolved_file_path}" against "{ignoreP}"')
+        if str(ignoreP) in str(resolved_file_path) or fnmatch.fnmatch(str(resolved_file_path), str(ignoreP)):
+            print(f'{C}─ ✖️ Skipping file because ignore path "{ignoreP}" is in "{resolved_file_path}"')
             return None
 
-    print(f'├─ ✅ Adding file: "{file}" with entry name "{entry_name}"')
+    print(f'{C} ✅ Adding file: "{file}" with entry name "{entry_name}"')
     
     return file
 

@@ -1,18 +1,31 @@
 import zipfile, pathlib, argparse, fnmatch
 from typing import List, Tuple, Iterable
 
-example_text = '''
+ROOT_FLAG = "--root_folder"
+ADDITIONAL_FLAG = "--input"
+OUTPUT_ZIP_FLAG = '--zip'
+IGNORE_FLAG = '--ignore'
+
+example_text = f'''
 Example:
-    zip-folder.py "folder" "folder.zip" --ignore "*/folder_ignore/*" "*/ignore_file.txt"
+    zip-folder.py {ROOT_FLAG} "input" {OUTPUT_ZIP_FLAG} "out/out.zip" {IGNORE_FLAG} "*/folder_ignore/*" "*/ignore_file.txt"
+
+    zip-folder.py {ADDITIONAL_FLAG} "input1" "input2" {OUTPUT_ZIP_FLAG} "out/out.zip" {IGNORE_FLAG} "*input1/folder_ignore/*" "*input2/ignore_file.txt"
 '''
 
-parser = argparse.ArgumentParser(description='Zip a folder', epilog=example_text)
-parser.add_argument("--root_folder", type=str, help="The root folder to zip", required=False)
-parser.add_argument('--input', type=str, nargs='+', help='The folders to zip', default=[])
-parser.add_argument('--zip', type=str, help='The zip file to create')
-parser.add_argument('--ignore', type=str, nargs='+', help='The paths to ignore', default=[])
+parser = argparse.ArgumentParser(
+    description='Zip a folder',
+    epilog=example_text,
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+)
+parser.add_argument(ROOT_FLAG, type=str, help="The root folder to zip", required=False)
+parser.add_argument(ADDITIONAL_FLAG, type=str, nargs='+', help='Additional files to zip', default=[])
+parser.add_argument(OUTPUT_ZIP_FLAG, type=str, help='The zip file to create', required=True)
+parser.add_argument(IGNORE_FLAG, type=str, nargs='+', help='Patters to ignore from the root folder and additional dirs', default=[])
 args = parser.parse_args()
 
+if args.root_folder is None and len(args.input) == 0:
+    raise argparse.ArgumentError(None, "No input files or root folder specified")
 
 # Define the folder to zip
 input_paths = [pathlib.Path(f) for f in args.input]

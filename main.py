@@ -24,14 +24,9 @@ print(f'Zip file: "{zip_file_path.resolve()}"')
 # Define the paths to ignore
 ignore_paths_relative = args.ignore
 
-ignore_paths = []
-
-if ignore_paths_relative is not None:
-    ignore_paths = [os.path.realpath(os.path.join(rootResolvedFolder, p)) for p in ignore_paths_relative]
-
 print()
 print(f'Ignore paths')
-for p in ignore_paths:
+for p in ignore_paths_relative:
     print(f'├─ "{p}"')
 print()
 
@@ -50,11 +45,12 @@ with zipfile.ZipFile(zip_file_path, "w") as zip_file:
             continue
 
         shouldIgnore = False
-        for ignorePaths in ignore_paths:
-            ignoreP = pathlib.Path(rootResolvedFolder / ignorePaths)
+        for ignorePaths in ignore_paths_relative:
+            # ignoreP = pathlib.Path(rootResolvedFolder / ignorePaths)
+            ignoreP = pathlib.Path(ignorePaths)
             print(f'├─ Testing "{rfile}" against "{ignoreP}"')
-            if rfile.is_relative_to(ignoreP):
-                print(f'├── ✖️ Skipping file because ignore path "{ignoreP}"')
+            if str(ignoreP) in str(rfile):
+                print(f'├── ✖️ Skipping file because ignore path "{ignoreP}" is in "{rfile}"')
                 shouldIgnore = True
                 break
 

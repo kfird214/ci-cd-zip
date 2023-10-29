@@ -24,6 +24,7 @@ inputs:
   dry_run:
     description: 'Dry run'
     required: false
+    default: 'false'
 
 # outputs:
 #   output_zip_location:
@@ -35,4 +36,4 @@ runs:
   steps:
     - name: Zip
       shell: cmd
-      run: python ${{ github.action_path }}/main.py --zip ${{ inputs.output_zip }} --root_folder ${{ inputs.root_folder }} --input ${{ inputs.additional }} --ignore ${{ inputs.ignore_patters }} --dry
+      run: python ${{ github.action_path }}/main.py --zip ${{ inputs.output_zip }} --root_folder ${{ inputs.root_folder }} --input ${{ inputs.additional }} --ignore ${{ inputs.ignore_patters }} --dry_run ${{ inputs.dry_run }}

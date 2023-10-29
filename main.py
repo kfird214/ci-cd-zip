@@ -105,7 +105,10 @@ def add_file_to_zip(resolved_file_path: pathlib.Path, entry_name: str):
 
 # Create the zip file
 zip_file = None
-if args.dry != False:
+
+if args.dry:
+    print('Dry run, not creating zip file')
+else:
     zip_file = zipfile.ZipFile(zip_file_path, "w")
 
 for folder_glob_pair in files_to_zip:

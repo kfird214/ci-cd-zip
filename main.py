@@ -22,13 +22,14 @@ parser.add_argument(ROOT_FLAG, type=str, help="The root folder to zip", required
 parser.add_argument(ADDITIONAL_FLAG, type=str, nargs='+', help='Additional files to zip', default=[])
 parser.add_argument(OUTPUT_ZIP_FLAG, type=str, help='The zip file to create', required=True)
 parser.add_argument(IGNORE_FLAG, type=str, nargs='+', help='Patters to ignore from the root folder and additional dirs', default=[])
+parser.add_argument('--dry', action='store_true', help='Dry run, do not create the zip file', default=False)
 args = parser.parse_args()
 
-if args.root_folder is None and len(args.input) == 0:
+if (args.root_folder is None or args.root_folder is '') and len(args.input) == 0:
     raise argparse.ArgumentError(None, "No input files or root folder specified")
 
 # Define the folder to zip
-input_paths = [pathlib.Path(f) for f in args.input]
+input_paths = [pathlib.Path(f) for f in args.input if f is not None and f !='']
 resolved_input_paths = [rp.resolve() for rp in input_paths]
 
 print('Inputs to zip')
@@ -38,7 +39,7 @@ print()
 
 # Define the name of the zip file to create
 zip_file_rel_path = args.zip
-if args.zip is None:
+if args.zip is None or args.zip == '':
     zip_file_rel_path = 'out.zip'
     print(f'No zip file specified, using "{zip_file_rel_path}"')
 
@@ -74,7 +75,7 @@ def add_file_to_zip(resolved_file_path: pathlib.Path, entry_name: str):
     print(rfile)
     if rfile.is_dir():
         print("├─ ✖️ 📁 Skipping directory: " + str(file))
-        return
+        return None
 
     for ignorePaths in ignore_paths_relative:
         # ignoreP = pathlib.Path(rootResolvedFolder / ignorePaths)
@@ -82,17 +83,25 @@ def add_file_to_zip(resolved_file_path: pathlib.Path, entry_name: str):
         print(f'├─ Testing "{rfile}" against "{ignoreP}"')
         if str(ignoreP) in str(rfile) or fnmatch.fnmatch(str(rfile), str(ignoreP)):
             print(f'├── ✖️ Skipping file because ignore path "{ignoreP}" is in "{rfile}"')
-            return
+            return None
 
     print(f'├─ ✅ Adding file: "{file}" with entry name "{entry_name}"')
     
-    zip_file.write(file, entry_name)
+    return file
 
 # Create the zip file
-with zipfile.ZipFile(zip_file_path, "w") as zip_file:
-    for folder_glob_pair in files_to_zip:
-        for file in folder_glob_pair[1]:
-            rfile = file.resolve()
-            root_path = folder_glob_pair[0].resolve()
-            entryName = str(rfile).replace(str(root_path), "")
-            add_file_to_zip(rfile, entryName)
+if args.dry != False:
+    zip_file = zipfile.ZipFile(zip_file_path, "w")
+
+for folder_glob_pair in files_to_zip:
+    for file in folder_glob_pair[1]:
+        rfile = file.resolve()
+        root_path = folder_glob_pair[0].resolve()
+        entryName = str(rfile).replace(str(root_path), "")
+        fpath = add_file_to_zip(rfile, entryName)
+
+        if args.dry != False and fpath is not None:
+            zip_file.write(fpath, entryName)
+
+if args.dry != False:
+    zip_file.close()
